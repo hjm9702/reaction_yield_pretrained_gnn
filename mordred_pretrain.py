@@ -19,6 +19,7 @@ import os
 import time
 import random
 import argparse
+import gc
 
 
 
@@ -161,22 +162,41 @@ class Pretraining_Dataset():
         
             if self.dname == 'chembl':
                 mordred = pd.read_csv('%s/%s_mordred/%s_mordred.csv'%(self.dpath, self.dname, self.dname), header=None)
-
+                
+                print('before # missing values: %d'%(mordred.isna().sum().sum()))
+                mordred.dropna(axis=1, inplace=True)
+                print('after # missing values: %d'%(mordred.isna().sum().sum()))
+            
             elif self.dname == 'zinc':
                 mordred = pd.concat([pd.read_csv('%s/%s_mordred/%s_mordred_%d.csv'%(self.dpath, self.dname, self.dname, idx), header=None) for idx in range(4)], axis=0)
+
+                print('before # missing values: %d'%(mordred.isna().sum().sum()))
+                mordred.dropna(axis=1, inplace=True)
+                print('after # missing values: %d'%(mordred.isna().sum().sum()))
 
             elif self.dname == 'chembl+zinc':
                 chembl_idx_wo_zinc = np.load('./pretrained_data/chembl/idx_wo_zinc.npz', allow_pickle=True)['data'][0]
                 mordred_chembl = pd.read_csv('%s/chembl_mordred/chembl_mordred.csv'%self.dpath, header=None).iloc[chembl_idx_wo_zinc]
+                print('chembl mordred loaded!')
                 mordred_zinc = pd.concat([pd.read_csv('%s/zinc_mordred/zinc_mordred_%d.csv'%(self.dpath, idx), header=None) for idx in range(4)], axis=0)
+                print('zinc mordred loaded!')
+                #mordred = pd.concat([mordred_chembl, mordred_zinc], axis=0)
+                #print('chembl, zinc concatenated!')
+                non_missing_idx = (mordred_chembl.isna().sum() == 0) & (mordred_zinc.isna().sum() == 0)
+                mordred_chembl = mordred_chembl.loc[:, non_missing_idx]
+                mordred_zinc = mordred_zinc.loc[:, non_missing_idx]
+
                 mordred = pd.concat([mordred_chembl, mordred_zinc], axis=0)
+                print('after # missing values: %d'%(mordred.isna().sum().sum()))
 
-                del mordred_chembl
-                del mordred_zinc
+                #mordred = mordred.iloc[np.random.choice(np.arange(len(mordred)), int(0.80*len(mordred)), replace=False)]
+                # del mordred_chembl
+                # del mordred_zinc
+                # del chembl_idx_wo_zinc
 
-            print('before # missing values: %d'%(mordred.isna().sum().sum()))
-            mordred.dropna(axis=1, inplace=True)
-            print('after # missing values: %d'%(mordred.isna().sum().sum()))
+                # gc.collect()
+
+            
 
             # scaler = StandardScaler()
             # mordred = scaler.fit_transform(mordred)
@@ -231,7 +251,8 @@ class Pretraining_Dataset():
 
 
         print('mordred load finished!!')
-        
+        np.savez_compressed('./test_chembl+zinc_mordred_processed.npz', data = [mordred])
+
         if self.dname == 'chembl':
             [mol_dict_1] = np.load('./pretrained_data/%s/%s_graph_0.npz'%(self.dname, self.dname), allow_pickle=True)
             [mol_dict_2] = np.load('./pretrained_data/%s/%s_graph_1.npz'%(self.dname, self.dname), allow_pickle=True)
@@ -249,14 +270,25 @@ class Pretraining_Dataset():
             [mol_dict_1] = np.load('./pretrained_data/chembl/chembl_graph_0.npz', allow_pickle=True)
             [mol_dict_2] = np.load('./pretrained_data/chembl/chembl_graph_1.npz', allow_pickle=True)
             mol_dict_chembl = {key: np.concatenate([mol_dict_1[key],mol_dict_2[key]], 0) for key in mol_dict_1.keys()}
+            
+            
+            chembl_idx_wo_zinc = np.load('./pretrained_data/chembl/idx_wo_zinc.npz', allow_pickle=True)['data'][0]
+            n_csum = np.concatenate([[0], np.cumsum(mol_dict_chembl['n_node'])])
+            e_csum = np.concatenate([[0], np.cumsum(mol_dict_chembl['n_edge'])])
+
             for key in mol_dict_chembl.keys():
-                mol_dict_chembl[key] = mol_dict_chembl[key][chembl_idx_wo_zinc]
+                if key in ['n_node', 'n_edge']:
+                    mol_dict_chembl[key] = mol_dict_chembl[key][chembl_idx_wo_zinc]
+                elif key == 'node_attr':
+                    mol_dict_chembl[key] = np.concatenate([mol_dict_chembl[key][n_csum[idx]:n_csum[idx+1]] for idx in chembl_idx_wo_zinc], 0)
+                elif key in ['edge_attr', 'src', 'dst']:
+                    mol_dict_chembl[key] = np.concatenate([mol_dict_chembl[key][e_csum[idx]:e_csum[idx+1]] for idx in chembl_idx_wo_zinc], 0)
             
             
             [mol_dict_3] = np.load('./pretrained_data/zinc/zinc_graph_0.npz', allow_pickle=True)
             [mol_dict_4] = np.load('./pretrained_data/zinc/zinc_graph_1.npz', allow_pickle=True)
 
-            mol_dict = {key: np.concatenate([mol_dict_chembl[key], mol_dict_3[key], mol_dict_4[key]], 0) for key in mol_dict_1.keys()}
+            mol_dict = {key: np.concatenate([mol_dict_chembl[key], mol_dict_3[key], mol_dict_4[key]], 0) for key in mol_dict_chembl.keys()}
         
         self.n_node = mol_dict['n_node']
         self.n_edge = mol_dict['n_edge']
