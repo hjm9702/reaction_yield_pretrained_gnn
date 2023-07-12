@@ -14,7 +14,7 @@ Source code for the paper: Improving Chemical Reaction Yield Prediction Using Pr
 - **src/pretrain.py** - pre-training functions
 - **src/finetune.py** - fine-tuning functions
 - **src/preprocess_util.py** - util functions for data preprocessing
-- **src/training_util.py** - util functions for model training / inference
+- **src/util.py** - util functions for model training / inference
 - **main_pretrain.py** - script for pre-training
 - **main_finetune.py** - script for fine-tuning
 - **run.sh** - run code example
