@@ -25,3 +25,8 @@ Source code for the paper: Improving Chemical Reaction Yield Prediction Using Pr
 - **DGL**
 - **RDKit**
 - **Mordred**
+
+## Citation
+```
+TBU
+```
