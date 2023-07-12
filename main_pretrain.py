@@ -33,7 +33,7 @@ if __name__ == "__main__":
     torch.manual_seed(args.seed)
     torch.backends.cudnn.benchmark = False
 
-    # We use the demo dataset (1k mols) for convenience in github repo.
+    # We use the demo dataset (10k mols) for convenience in github repo.
     # The full dataset (10M mols collected from Pubchem) can be downloaded from
     # https://arxiv.org/pdf/2010.09885.pdf
     molsuppl = Chem.SmilesMolSupplier(
