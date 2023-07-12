@@ -7,7 +7,7 @@ from scipy import stats
 
 from src.model import reactionMPNN, training, inference
 from src.dataset import GraphDataset
-from src.train_util import collate_reaction_graphs
+from src.util import collate_reaction_graphs
 
 # data_id -> #data_id 1: Buchwald-Hartwig, #data_id 2: Suzuki-Miyaura, %data_id 3: out-of-sample test splits for Buchwald-Hartwig
 # split_id -> #data_id 1 & 2: 0-9, data_id 3: 1-4

@@ -9,7 +9,7 @@ from sklearn.preprocessing import StandardScaler
 from sklearn.decomposition import PCA
 
 from src.model import GIN, linear_head
-from src.train_util import collate_graphs_pretraining
+from src.util import collate_graphs_pretraining
 
 
 def pretrain(args):

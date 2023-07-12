@@ -8,7 +8,7 @@ from dgl.nn.pytorch import GINEConv
 from dgl.nn.pytorch.glob import AvgPooling
 from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
 
-from src.train_util import MC_dropout
+from src.util import MC_dropout
 
 
 class linear_head(nn.Module):
