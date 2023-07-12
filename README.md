@@ -2,7 +2,7 @@
 Source code for the paper: Improving Chemical Reaction Yield Prediction Using Pre-Trained Graph Neural Networks
 
 ## Data
-- The datasets used in the paper can be downloaded from
+- The datasets used in the paper
   - Pre-Training Dataset (10M mols collected from Pubchem) - https://arxiv.org/pdf/2010.09885.pdf
   - Chemical Reaction Yield Benchmark Datasets - https://github.com/rxn4chemistry/rxn_yields/
 
