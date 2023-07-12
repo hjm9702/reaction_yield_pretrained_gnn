@@ -8,10 +8,6 @@ import warnings
 
 warnings.filterwarnings("ignore")
 
-# the full dataset (10M mols collected from Pubchem) can be downloaded from
-# https://arxiv.org/pdf/2010.09885.pdf
-
-
 def preprocess(molsuppl, graph_save_path):
     length = len(molsuppl)
 
