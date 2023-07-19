@@ -100,6 +100,12 @@ def get_mordred(molsuppl, mordred_save_path):
         if i % 10000 == 0:
             print("%d mol- mordred calculated!" % i)
 
+    # For multi-processing, the number of threads should be limited before running the program.
+    # export OMP_NUM_THREADS=2
+    # export MKL_NUM_THREADS=2
+    # export MKL_THREADING_LAYER=SEQUENTIAL
+    # export NUMEXPR_NUM_THREADS=2
+    
     mordred_list = calc.pandas(mol_list).fill_missing(np.nan).to_numpy(dtype=float)
 
     with open(
