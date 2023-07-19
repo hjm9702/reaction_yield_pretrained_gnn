@@ -21,7 +21,7 @@ def preprocess(molsuppl, graph_save_path):
     }
 
     for i, mol in enumerate(molsuppl):
-        mol = molsuppl[i]
+ 
         try:
             Chem.SanitizeMol(mol)
             si = Chem.FindPotentialStereo(mol)
@@ -65,13 +65,12 @@ def preprocess(molsuppl, graph_save_path):
 
 
 def get_mordred(molsuppl, mordred_save_path):
-    # mordred calculation can be further accelerated if setting multiprocessing environments
+    
     calc = Calculator(descriptors, ignore_3D=True)
 
-    mordred_list = []
+    mol_list = []
 
     for i, mol in enumerate(molsuppl):
-        mol = molsuppl[i]
 
         try:
             Chem.SanitizeMol(mol)
@@ -95,13 +94,13 @@ def get_mordred(molsuppl, mordred_save_path):
         except:
             continue
 
-        mol_attr = calc(mol).fill_missing(np.nan)
-        mordred_list.append(mol_attr)
+        
+        mol_list.append(mol)
 
         if i % 10000 == 0:
             print("%d mol- mordred calculated!" % i)
 
-    mordred_list = np.vstack(mordred_list)
+    mordred_list = calc.pandas(mol_list).fill_missing(np.nan).to_numpy(dtype=float)
 
     with open(
         mordred_save_path + "pubchem_mordred.npz",
